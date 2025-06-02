@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  
+  // Relations
+  blockscoutServers BlockscoutServer[]
+  rpcServers        RpcServer[] // <-- Add this line
+  
+  @@map("project")
+}
+
+model RpcServer {
+  id           Int      @id @default(autoincrement())
+  projectId    Int      @map("project_id")
+  serverUrl    String   @map("server_url")
+  ipAddress    String   @map("ip_address")
+  chainId      String?  @map("chain_id")
+  isActive     Boolean  @default(true) @map("is_active")
+  description  String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at") 
+  
+  // Relations
+  project      Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@map("rpc_servers")
+}
+
+model BlockscoutServer {
+  id           Int      @id @default(autoincrement())
+  projectId    Int      @map("project_id")
+  networkType  NetworkType @map("network_type")
+  serverUrl    String   @map("server_url")
+  ipAddress    String   @map("ip_address")
+  chainId      String?  @map("chain_id")
+  currency     String?  @map("currency")
+  logo_url     String?  @map("logo_url")
+  rpc_url String?  @map("rpc_url")
+  network_link  String?  @map("network_link")
+  footer_link  String?  @map("footer_link")
+  isActive     Boolean  @default(true) @map("is_active")
+  description  String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  
+  // Relations
+  project      Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@map("blockscout_servers")
+}
+
+enum NetworkType {
+  mainnet
+  testnet
+}
+

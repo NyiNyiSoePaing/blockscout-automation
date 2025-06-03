@@ -86,12 +86,6 @@ class RpcController {
 
   async createDigitalOceanDroplet(server) {
     try {
-      // Parse SSH keys from environment
-      const sshKeys = process.env.DO_SSH_KEYS ? 
-        process.env.DO_SSH_KEYS.split(',').map(key => parseInt(key.trim())).filter(key => !isNaN(key)) : 
-        [];
-
-      console.log('Using SSH keys:', sshKeys);
 
       const dropletConfig = {
         name: `rpc-server-${server.id}`,
@@ -101,15 +95,9 @@ class RpcController {
         backups: false,
         ipv6: true,
         monitoring: true,
+        ssh_keys: process.env.DO_SSH_KEYS,
         tags: [`project-${server.projectId}`, 'rpc-server', `server-id-${server.id}`],
       };
-
-      // Only add ssh_keys if we have valid ones
-      if (sshKeys.length > 0) {
-        dropletConfig.ssh_keys = sshKeys;
-      } else {
-        console.warn('No SSH keys provided. Droplet will only be accessible via console.');
-      }
 
       console.log('Creating droplet with config:', JSON.stringify(dropletConfig, null, 2));
 

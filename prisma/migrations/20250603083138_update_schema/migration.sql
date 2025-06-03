@@ -2,7 +2,7 @@
 CREATE TYPE "NetworkType" AS ENUM ('mainnet', 'testnet');
 
 -- CreateEnum
-CREATE TYPE "Status" AS ENUM ('provisioning', 'ready_to_domain_setup', 'running', 'failed');
+CREATE TYPE "Status" AS ENUM ('provisioning', 'ready_to_domain_setup', 'running', 'ssl_setup_started', 'ssl_failed', 'failed');
 
 -- CreateTable
 CREATE TABLE "project" (

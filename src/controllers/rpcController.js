@@ -59,7 +59,7 @@ class RpcController {
       // Respond immediately to the client
       res.status(201).json({
         success: true,
-        message: 'RPC server created successfully, Initializing server.... please wait a moment',
+        message: 'RPC server creation initiated. This process may take several minutes',
         data: server
       });
 
@@ -397,7 +397,7 @@ class RpcController {
       const path = require('path');
       
       // Path to your SSL Ansible playbook
-      const playbookPath = path.join(__dirname, '../../ansible/SslSetup.yml');
+      const playbookPath = path.join(__dirname, '../../ansible/RpcSslSetup.yml');
       
       // Run Ansible playbook for SSL setup
       const ansibleProcess = spawn('ansible-playbook', [

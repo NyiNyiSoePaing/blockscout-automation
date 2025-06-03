@@ -1,0 +1,7 @@
+- name: Simple playbook to print SSL 
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Print SSL
+      ansible.builtin.debug:
+        msg: "SSL Done"

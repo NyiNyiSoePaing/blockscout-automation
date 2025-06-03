@@ -86,7 +86,6 @@ class BlockscoutService {
     const project = await prisma.project.findUnique({
       where: {
         id: parseInt(data.projectId),
-        deletedAt: null
       }
     });
 
@@ -109,7 +108,7 @@ class BlockscoutService {
         rpc_url: data.rpc_url,
         network_link: data.network_link,
         footer_link: data.footer_link,
-        isActive: data.isActive !== undefined ? data.isActive : true,
+        status:  'provisioning',
         description: data.description
       },
       include: {

@@ -21,4 +21,7 @@ router.put('/:id', rpcValidation.update, rpcController.updateRpcServer);
 // DELETE /api/rpc/:id - Delete RPC server (soft delete by default, ?hard=true for permanent)
 router.delete('/:id', rpcValidation.delete, rpcController.deleteRpcServer);
 
+// POST /api/rpc/:id/domain - Set domain and create SSL certificate for RPC server
+router.post('/:id/domainCreate', rpcValidation.domain, rpcController.createSslCertificate);
+
 module.exports = router;

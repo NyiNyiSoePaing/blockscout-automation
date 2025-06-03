@@ -13,25 +13,27 @@ model Project {
   description String?
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
   
   // Relations
   blockscoutServers BlockscoutServer[]
-  rpcServers        RpcServer[] // <-- Add this line
+  rpcServers        RpcServer[]
   
   @@map("project")
 }
 
 model RpcServer {
-  id           Int      @id @default(autoincrement())
-  projectId    Int      @map("project_id")
-  serverUrl    String   @map("server_url")
-  ipAddress    String   @map("ip_address")
-  chainId      String?  @map("chain_id")
-  isActive     Boolean  @default(true) @map("is_active")
+  id           Int         @id @default(autoincrement())
+  projectId    Int         @map("project_id")
+  networkType  NetworkType @map("network_type")
+  serverUrl    String?     @map("server_url")
+  dropletId    String?     @map("droplet_id")
+  ipAddress    String?     @map("ip_address")
+  chainId      String?     @map("chain_id")
+  isActive     Boolean     @default(true) @map("is_active")
+  status       Status?
   description  String?
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at") 
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at") 
   
   // Relations
   project      Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -40,22 +42,23 @@ model RpcServer {
 }
 
 model BlockscoutServer {
-  id           Int      @id @default(autoincrement())
-  projectId    Int      @map("project_id")
+  id           Int         @id @default(autoincrement())
+  projectId    Int         @map("project_id")
   networkType  NetworkType @map("network_type")
-  serverUrl    String   @map("server_url")
-  ipAddress    String   @map("ip_address")
-  chainId      String?  @map("chain_id")
-  currency     String?  @map("currency")
-  logo_url     String?  @map("logo_url")
-  rpc_url String?  @map("rpc_url")
-  network_link  String?  @map("network_link")
-  footer_link  String?  @map("footer_link")
-  isActive     Boolean  @default(true) @map("is_active")
+  serverUrl    String?     @map("server_url")
+  dropletId    String?     @map("droplet_id")
+  ipAddress    String?     @map("ip_address")
+  chainId      String?     @map("chain_id")
+  currency     String?     @map("currency")
+  logo_url     String?     @map("logo_url")
+  rpc_url      String?     @map("rpc_url")
+  network_link String?     @map("network_link")
+  footer_link  String?     @map("footer_link")
+  isActive     Boolean     @default(true) @map("is_active")
+  status       Status?
   description  String?
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
   
   // Relations
   project      Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -68,3 +71,11 @@ enum NetworkType {
   testnet
 }
 
+enum Status {
+  provisioning
+  ready_to_domain_setup
+  running
+  ssl_setup_started
+  ssl_failed
+  failed
+}

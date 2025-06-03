@@ -3,9 +3,6 @@ const prisma = require('../lib/prisma');
 class RpcService {
   async getAllRpcServers() {
     return await prisma.rpcServer.findMany({
-      where: {
-        isActive: true
-      },
       include: {
         project: {
           select: {
@@ -24,8 +21,7 @@ class RpcService {
   async getRpcServerById(id) {
     const server = await prisma.rpcServer.findUnique({
       where: {
-        id: parseInt(id),
-        isActive: true
+        id: parseInt(id)
       },
       include: {
         project: {
@@ -48,8 +44,7 @@ class RpcService {
   async getRpcServersByProject(projectId) {
     return await prisma.rpcServer.findMany({
       where: {
-        projectId: parseInt(projectId),
-        isActive: true
+        projectId: parseInt(projectId)
       },
       include: {
         project: {
@@ -71,7 +66,6 @@ class RpcService {
     const project = await prisma.project.findUnique({
       where: {
         id: parseInt(data.projectId),
-        deletedAt: null
       }
     });
 
@@ -82,10 +76,9 @@ class RpcService {
     return await prisma.rpcServer.create({
       data: {
         projectId: parseInt(data.projectId),
-        serverUrl: data.serverUrl,
-        ipAddress: data.ipAddress,
+        networkType: data.networkType,
         chainId: data.chainId,
-        isActive: data.isActive !== undefined ? data.isActive : true,
+        status: 'provisioning',
         description: data.description
       },
       include: {
@@ -109,10 +102,11 @@ class RpcService {
         id: parseInt(id)
       },
       data: {
+        ...(data.networkType && { networkType: data.networkType }),
         ...(data.serverUrl && { serverUrl: data.serverUrl }),
         ...(data.ipAddress && { ipAddress: data.ipAddress }),
         ...(data.chainId !== undefined && { chainId: data.chainId }),
-        ...(data.isActive !== undefined && { isActive: data.isActive }),
+        ...(data.status && { status: data.status }),
         ...(data.description !== undefined && { description: data.description })
       },
       include: {
@@ -128,21 +122,6 @@ class RpcService {
   }
 
   async deleteRpcServer(id) {
-    // Check if server exists
-    await this.getRpcServerById(id);
-
-    // Soft delete by setting isActive to false
-    return await prisma.rpcServer.update({
-      where: {
-        id: parseInt(id)
-      },
-      data: {
-        isActive: false
-      }
-    });
-  }
-
-  async hardDeleteRpcServer(id) {
     // Check if server exists
     await this.getRpcServerById(id);
 

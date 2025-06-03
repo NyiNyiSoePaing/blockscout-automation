@@ -1,6 +1,9 @@
 -- CreateEnum
 CREATE TYPE "NetworkType" AS ENUM ('mainnet', 'testnet');
 
+-- CreateEnum
+CREATE TYPE "Status" AS ENUM ('provisioning', 'ready_to_domain_setup', 'running', 'failed');
+
 -- CreateTable
 CREATE TABLE "project" (
     "id" SERIAL NOT NULL,
@@ -8,7 +11,6 @@ CREATE TABLE "project" (
     "description" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "deleted_at" TIMESTAMP(3),
 
     CONSTRAINT "project_pkey" PRIMARY KEY ("id")
 );
@@ -17,10 +19,13 @@ CREATE TABLE "project" (
 CREATE TABLE "rpc_servers" (
     "id" SERIAL NOT NULL,
     "project_id" INTEGER NOT NULL,
-    "server_url" TEXT NOT NULL,
-    "ip_address" TEXT NOT NULL,
+    "network_type" "NetworkType" NOT NULL,
+    "server_url" TEXT,
+    "droplet_id" TEXT,
+    "ip_address" TEXT,
     "chain_id" TEXT,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "status" "Status",
     "description" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -33,8 +38,9 @@ CREATE TABLE "blockscout_servers" (
     "id" SERIAL NOT NULL,
     "project_id" INTEGER NOT NULL,
     "network_type" "NetworkType" NOT NULL,
-    "server_url" TEXT NOT NULL,
-    "ip_address" TEXT NOT NULL,
+    "server_url" TEXT,
+    "droplet_id" TEXT,
+    "ip_address" TEXT,
     "chain_id" TEXT,
     "currency" TEXT,
     "logo_url" TEXT,
@@ -42,6 +48,7 @@ CREATE TABLE "blockscout_servers" (
     "network_link" TEXT,
     "footer_link" TEXT,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "status" "Status",
     "description" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,

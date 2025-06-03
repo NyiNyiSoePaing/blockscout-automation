@@ -55,9 +55,9 @@ const blockscoutValidation = {
     body('serverUrl')
       .isURL()
       .withMessage('Valid server URL is required'),
-    body('ipAddress')
-      .isIP()
-      .withMessage('Valid IP address is required'),
+    // body('ipAddress')
+    //   .isIP()
+    //   .withMessage('Valid IP address is required'),
     body('chainId')
       .optional()
       .isString()
@@ -150,12 +150,13 @@ const blockscoutValidation = {
 const rpcValidation = {
   create: [
     body('projectId').isInt({ min: 1 }).withMessage('Valid project ID is required'),
-    body('serverUrl')
-      .isURL()
-      .withMessage('Valid server URL is required'),
-    body('ipAddress')
-      .isIP()
-      .withMessage('Valid IP address is required'),
+    // body('serverUrl')
+    //   .isURL()
+    //   .withMessage('Valid server URL is required'),
+    body('network_link')
+      .optional()
+      .isString()
+      .withMessage('Network links must be a string'),
     body('chainId')
       .optional()
       .isString()
@@ -164,10 +165,28 @@ const rpcValidation = {
       .optional()
       .isBoolean()
       .withMessage('isActive must be a boolean'),
+    body('serverUrl')
+      .optional()
+      .isString()
+      .withMessage('serverUrl must be a string'),
     body('description')
       .optional()
       .isLength({ max: 1000 })
       .withMessage('Description must not exceed 1000 characters'),
+    handleValidationErrors
+  ],
+  domain: [
+    param('id').isInt({ min: 1 }).withMessage('Valid RPC server ID is required'),
+    // body('id')
+    //   .isInt({ min: 1 })
+    //   .withMessage('Valid RPC server ID is required'),
+    body('domain')
+      .notEmpty()
+      .withMessage('Domain is required')
+      .isString()
+      .withMessage('Domain must be a string')
+      .matches(/^(?!\-)(?:[a-zA-Z0-9\-]{1,63}\.)+[a-zA-Z]{2,}$/)
+      .withMessage('Domain must be a valid domain name'),
     handleValidationErrors
   ],
   update: [

@@ -79,35 +79,25 @@ class ProjectController {
       next(error);
     }
   }
-
-  async deleteProject(req, res, next) {
-    try {
-      const { id } = req.params;
-      const { hard } = req.query;
-      
-      if (hard === 'true') {
-        await projectService.hardDeleteProject(id);
-        res.json({
-          success: true,
-          message: 'Project permanently deleted successfully'
-        });
-      } else {
-        await projectService.deleteProject(id);
-        res.json({
-          success: true,
-          message: 'Project deleted successfully'
-        });
-      }
-    } catch (error) {
-      if (error.message === 'Project not found') {
-        return res.status(404).json({
-          success: false,
-          message: 'Project not found'
-        });
-      }
-      next(error);
+async deleteProject(req, res, next) {
+  try {
+    const { id } = req.params;
+    
+    await projectService.deleteProject(id);
+    res.json({
+      success: true,
+      message: 'Project permanently deleted successfully'
+    });
+  } catch (error) {
+    if (error.message === 'Project not found') {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found'
+      });
     }
+    next(error);
   }
+}
 }
 
 module.exports = new ProjectController();

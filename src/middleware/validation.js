@@ -52,9 +52,9 @@ const blockscoutValidation = {
     body('networkType')
       .isIn(['mainnet', 'testnet'])
       .withMessage('Network type must be either mainnet or testnet'),
-    body('serverUrl')
-      .isURL()
-      .withMessage('Valid server URL is required'),
+    // body('serverUrl')
+    //   .isURL()
+    //   .withMessage('Valid server URL is required'),
     // body('ipAddress')
     //   .isIP()
     //   .withMessage('Valid IP address is required'),

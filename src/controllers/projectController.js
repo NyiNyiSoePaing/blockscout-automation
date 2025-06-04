@@ -1,6 +1,8 @@
 const projectService = require('../services/projectService');
 const rpcService = require('../services/rpcService');
 const rpcController = require('./rpcController');
+const blockscoutService = require('../services/blockscoutService');
+const axios = require('axios');
 
 class ProjectController {
   async getAllProjects(req, res, next) {
@@ -126,7 +128,7 @@ class ProjectController {
         console.log(`Found ${rpcServers.length} RPC servers to cleanup for project ${projectId}`);
         
         // Delete all RPC servers and their droplets
-        const deletePromises = rpcServers.map(async (server) => {
+        const rpcDeletePromises = rpcServers.map(async (server) => {
           try {
             console.log(`Cleaning up RPC server ${server.id}`);
             
@@ -150,10 +152,47 @@ class ProjectController {
         });
         
         // Wait for all RPC server cleanups to complete
-        await Promise.allSettled(deletePromises);
+        await Promise.allSettled(rpcDeletePromises);
         console.log(`All RPC servers cleanup completed for project ${projectId}`);
       } else {
         console.log(`No RPC servers found for project ${projectId}`);
+      }
+      
+      // Get all Blockscout servers associated with this project
+      const blockscoutServers = await blockscoutService.getBlockscoutServersByProject(projectId);
+      
+      if (blockscoutServers.length > 0) {
+        console.log(`Found ${blockscoutServers.length} Blockscout servers to cleanup for project ${projectId}`);
+        
+        // Delete all Blockscout servers and their droplets
+        const blockscoutDeletePromises = blockscoutServers.map(async (server) => {
+          try {
+            console.log(`Cleaning up Blockscout server ${server.id}`);
+            
+            // Delete DigitalOcean droplet
+            const dropletDeleted = await this.deleteBlockscoutDroplet(server.id);
+            
+            if (dropletDeleted) {
+              console.log(`Droplet cleanup completed for Blockscout server ${server.id}`);
+            } else {
+              console.warn(`Droplet cleanup failed for Blockscout server ${server.id}, but continuing`);
+            }
+            
+            // Delete from database
+            await blockscoutService.deleteBlockscoutServer(server.id);
+            console.log(`Blockscout server ${server.id} deleted from database`);
+            
+          } catch (error) {
+            console.error(`Error cleaning up Blockscout server ${server.id}:`, error);
+            // Continue with other servers even if one fails
+          }
+        });
+        
+        // Wait for all Blockscout server cleanups to complete
+        await Promise.allSettled(blockscoutDeletePromises);
+        console.log(`All Blockscout servers cleanup completed for project ${projectId}`);
+      } else {
+        console.log(`No Blockscout servers found for project ${projectId}`);
       }
       
       // Finally, delete the project itself
@@ -163,7 +202,7 @@ class ProjectController {
     } catch (error) {
       console.error(`Error during project ${projectId} cleanup:`, error);
       
-      // Try to delete the project even if RPC cleanup failed
+      // Try to delete the project even if cleanup failed
       try {
         await projectService.deleteProject(projectId);
         console.log(`Project ${projectId} deleted from database despite cleanup errors`);
@@ -203,6 +242,83 @@ class ProjectController {
       }
       
       console.error('Error deleting DigitalOcean droplet:', error.response?.data || error.message);
+      return false;
+    }
+  }
+
+  async findBlockscoutDropletByServerId(serverId) {
+    try {
+      // First try to get droplet ID from database
+      const server = await blockscoutService.getBlockscoutServerById(serverId);
+      if (server.dropletId) {
+        return server.dropletId;
+      }
+
+      // Fallback: search by tag if dropletId is not stored
+      const response = await axios.get(
+        `https://api.digitalocean.com/v2/droplets?tag_name=server-id-${serverId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${process.env.DO_API_TOKEN}`
+          }
+        }
+      );
+
+      const droplets = response.data.droplets;
+      if (droplets.length > 0) {
+        return droplets[0].id;
+      }
+
+      // Final fallback: search by name pattern
+      const allDropletsResponse = await axios.get(
+        'https://api.digitalocean.com/v2/droplets',
+        {
+          headers: {
+            'Authorization': `Bearer ${process.env.DO_API_TOKEN}`
+          }
+        }
+      );
+
+      const matchingDroplet = allDropletsResponse.data.droplets.find(
+        droplet => droplet.name === `blockscout-server-${serverId}`
+      );
+
+      return matchingDroplet ? matchingDroplet.id : null;
+    } catch (error) {
+      console.error('Error finding Blockscout droplet:', error.response?.data || error.message);
+      return null;
+    }
+  }
+
+  async deleteBlockscoutDroplet(serverId) {
+    try {
+      const dropletId = await this.findBlockscoutDropletByServerId(serverId);
+      
+      if (!dropletId) {
+        console.log(`No droplet found for Blockscout server ${serverId}`);
+        return true; // Consider it successful if no droplet exists
+      }
+
+      console.log(`Deleting droplet ${dropletId} for Blockscout server ${serverId}`);
+
+      await axios.delete(
+        `https://api.digitalocean.com/v2/droplets/${dropletId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${process.env.DO_API_TOKEN}`
+          }
+        }
+      );
+
+      console.log(`Droplet ${dropletId} deleted successfully`);
+      return true;
+    } catch (error) {
+      if (error.response?.status === 404) {
+        console.log(`Droplet not found (already deleted?) for Blockscout server ${serverId}`);
+        return true; // Consider 404 as success since droplet doesn't exist
+      }
+      
+      console.error('Error deleting DigitalOcean droplet for Blockscout server:', error.response?.data || error.message);
       return false;
     }
   }

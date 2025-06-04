@@ -92,6 +92,17 @@ const blockscoutValidation = {
       .withMessage('Description must not exceed 1000 characters'),
     handleValidationErrors
   ],
+  domain: [
+    param('id').isInt({ min: 1 }).withMessage('Valid Blockscout server ID is required'),
+    body('domain')
+      .notEmpty()
+      .withMessage('Domain is required')
+      .isString()
+      .withMessage('Domain must be a string')
+      .matches(/^(?!\-)(?:[a-zA-Z0-9\-]{1,63}\.)+[a-zA-Z]{2,}$/)
+      .withMessage('Domain must be a valid domain name'),
+    handleValidationErrors
+  ],
   update: [
     param('id').isInt({ min: 1 }).withMessage('Valid blockscout server ID is required'),
     body('networkType')

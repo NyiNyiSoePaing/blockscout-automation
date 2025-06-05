@@ -15,8 +15,6 @@ COPY . /usr/src/app
 RUN npm install
 RUN chmod 400 /usr/src/app/ansible/deployer.pem
 
-# Build the application
-RUN npm run build
 
 # to start the application
 CMD ["npm", "run", "dev"]

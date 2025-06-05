@@ -4,13 +4,13 @@ const rpcController = require('../controllers/rpcController');
 const { rpcValidation } = require('../middleware/validation');
 
 // GET /api/rpc - Get all RPC servers
-router.get('/', rpcController.getAllRpcServers);
+router.get('/', rpcController.getAllrpc_servers);
 
 // GET /api/rpc/:id - Get RPC server by ID
 router.get('/:id', rpcController.getRpcServerById);
 
-// GET /api/rpc/project/:projectId - Get RPC servers by project
-router.get('/project/:projectId', rpcController.getRpcServersByProject);
+// GET /api/rpc/project/:project_id - Get RPC servers by project
+router.get('/project/:project_id', rpcController.getrpc_serversByProject);
 
 // POST /api/rpc - Create new RPC server
 router.post('/', rpcValidation.create, rpcController.createRpcServer);

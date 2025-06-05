@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "NetworkType" AS ENUM ('mainnet', 'testnet');
+CREATE TYPE "network_type" AS ENUM ('mainnet', 'testnet');
 
 -- CreateEnum
 CREATE TYPE "Status" AS ENUM ('provisioning', 'ready_to_domain_setup', 'running', 'ssl_setup_started', 'ssl_failed', 'failed');
@@ -19,7 +19,7 @@ CREATE TABLE "project" (
 CREATE TABLE "rpc_servers" (
     "id" SERIAL NOT NULL,
     "project_id" INTEGER NOT NULL,
-    "network_type" "NetworkType" NOT NULL,
+    "network_type" "network_type" NOT NULL,
     "server_url" TEXT,
     "droplet_id" TEXT,
     "ip_address" TEXT,
@@ -37,7 +37,7 @@ CREATE TABLE "rpc_servers" (
 CREATE TABLE "blockscout_servers" (
     "id" SERIAL NOT NULL,
     "project_id" INTEGER NOT NULL,
-    "network_type" "NetworkType" NOT NULL,
+    "network_type" "network_type" NOT NULL,
     "server_url" TEXT,
     "droplet_id" TEXT,
     "ip_address" TEXT,

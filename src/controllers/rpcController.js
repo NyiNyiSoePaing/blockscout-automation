@@ -2,9 +2,9 @@ const rpcService = require('../services/rpcService');
 const axios = require('axios');
 
 class RpcController {
-  async getAllRpcServers(req, res, next) {
+  async getAllrpc_servers(req, res, next) {
     try {
-      const servers = await rpcService.getAllRpcServers();
+      const servers = await rpcService.getAllrpc_servers();
       res.json({
         success: true,
         message: 'RPC servers retrieved successfully',
@@ -36,10 +36,10 @@ class RpcController {
     }
   }
 
-  async getRpcServersByProject(req, res, next) {
+  async getrpc_serversByProject(req, res, next) {
     try {
-      const { projectId } = req.params;
-      const servers = await rpcService.getRpcServersByProject(projectId);
+      const { project_id } = req.params;
+      const servers = await rpcService.getrpc_serversByProject(project_id);
       res.json({
         success: true,
         message: 'RPC servers retrieved successfully',
@@ -96,7 +96,7 @@ class RpcController {
         ipv6: true,
         monitoring: true,
         ssh_keys: process.env.DO_SSH_KEYS,
-        tags: [`project-${server.projectId}`, 'rpc-server', `server-id-${server.id}`],
+        tags: [`project-${server.project_id}`, 'rpc-server', `server-id-${server.id}`],
       };
 
       console.log('Creating droplet with config:', JSON.stringify(dropletConfig, null, 2));
@@ -117,7 +117,7 @@ class RpcController {
 
       // Store droplet ID in database for later deletion
       await rpcService.updateRpcServer(server.id, { 
-        dropletId: droplet.id,
+        droplet_id: droplet.id,
         status: 'provisioning'
       });
 
@@ -132,14 +132,14 @@ class RpcController {
     }
   }
 
-  async waitForDropletActive(dropletId, serverId) {
+  async waitForDropletActive(droplet_id, serverId) {
     const maxAttempts = 30; // 5 minutes max wait time
     let attempts = 0;
 
     while (attempts < maxAttempts) {
       try {
         const response = await axios.get(
-          `https://api.digitalocean.com/v2/droplets/${dropletId}`,
+          `https://api.digitalocean.com/v2/droplets/${droplet_id}`,
           {
             headers: {
               'Authorization': `Bearer ${process.env.DO_API_TOKEN}`
@@ -155,11 +155,11 @@ class RpcController {
           if (publicIp) {
             // Update server with actual IP address
             await rpcService.updateRpcServer(serverId, { 
-              ipAddress: publicIp,
+              ip_address: publicIp,
               status: 'ready_to_domain_setup'
             });
             
-            console.log(`Droplet ${dropletId} is active with IP: ${publicIp}`);
+            console.log(`Droplet ${droplet_id} is active with IP: ${publicIp}`);
             
             // Run Ansible setup after droplet is ready
             this.runAnsibleSetupRpc(publicIp, serverId);
@@ -179,12 +179,12 @@ class RpcController {
 
     // If we reach here, droplet creation failed or timed out
     await rpcService.updateRpcServer(serverId, { status: 'failed' });
-    console.error(`Droplet ${dropletId} failed to become active within timeout period`);
+    console.error(`Droplet ${droplet_id} failed to become active within timeout period`);
   }
 
-  async runAnsibleSetupRpc(ipAddress, serverId) {
+  async runAnsibleSetupRpc(ip_address, serverId) {
     try {
-      console.log(`Starting Ansible setup for server ${serverId} at IP: ${ipAddress}`);
+      console.log(`Starting Ansible setup for server ${serverId} at IP: ${ip_address}`);
       
       const { spawn } = require('child_process');
       const path = require('path');
@@ -195,7 +195,7 @@ class RpcController {
       // Run Ansible playbook
       const ansibleProcess = spawn('ansible-playbook', [
         playbookPath,
-        '-i', `${ipAddress},`,  // Dynamic inventory
+        '-i', `${ip_address},`,  // Dynamic inventory
         '--private-key', process.env.ANSIBLE_PRIVATE_KEY_PATH || '~/.ssh/id_rsa',
         '--user', process.env.ANSIBLE_USER || 'root',
         '--extra-vars', `server_id=${serverId}`,
@@ -230,11 +230,11 @@ class RpcController {
     try {
       // First try to get droplet ID from database
       const server = await rpcService.getRpcServerById(serverId);
-      if (server.dropletId) {
-        return server.dropletId;
+      if (server.droplet_id) {
+        return server.droplet_id;
       }
 
-      // Fallback: search by tag if dropletId is not stored
+      // Fallback: search by tag if droplet_id is not stored
       const response = await axios.get(
         `https://api.digitalocean.com/v2/droplets?tag_name=server-id-${serverId}`,
         {
@@ -272,17 +272,17 @@ class RpcController {
 
   async deleteDigitalOceanDroplet(serverId) {
     try {
-      const dropletId = await this.findDropletByServerId(serverId);
+      const droplet_id = await this.findDropletByServerId(serverId);
       
-      if (!dropletId) {
+      if (!droplet_id) {
         console.log(`No droplet found for server ${serverId}`);
         return true; // Consider it successful if no droplet exists
       }
 
-      console.log(`Deleting droplet ${dropletId} for server ${serverId}`);
+      console.log(`Deleting droplet ${droplet_id} for server ${serverId}`);
 
       await axios.delete(
-        `https://api.digitalocean.com/v2/droplets/${dropletId}`,
+        `https://api.digitalocean.com/v2/droplets/${droplet_id}`,
         {
           headers: {
             'Authorization': `Bearer ${process.env.DO_API_TOKEN}`
@@ -290,7 +290,7 @@ class RpcController {
         }
       );
 
-      console.log(`Droplet ${dropletId} deleted successfully`);
+      console.log(`Droplet ${droplet_id} deleted successfully`);
       return true;
     } catch (error) {
       if (error.response?.status === 404) {
@@ -337,7 +337,7 @@ class RpcController {
         });
       }
       
-      if (!server.ipAddress) {
+      if (!server.ip_address) {
         return res.status(400).json({
           success: false,
           message: 'Server IP address not available. Server may still be provisioning.'
@@ -365,7 +365,7 @@ class RpcController {
       const controller = this;
       setImmediate(async () => {
         try {
-          await controller.createSslCertificate(server.ipAddress, id, domain);
+          await controller.createSslCertificate(server.ip_address, id, domain);
         } catch (error) {
           console.error('Background SSL setup failed:', error);
           await rpcService.updateRpcServer(id, { status: 'ssl_failed' });
@@ -377,9 +377,9 @@ class RpcController {
     }
   }
   
-  async createSslCertificate(ipAddress, serverId, domain) {
+  async createSslCertificate(ip_address, serverId, domain) {
     try {
-      console.log(`Starting SSL setup for server ${serverId} at IP: ${ipAddress} with domain: ${domain}`);
+      console.log(`Starting SSL setup for server ${serverId} at IP: ${ip_address} with domain: ${domain}`);
       
       const { spawn } = require('child_process');
       const path = require('path');
@@ -390,7 +390,7 @@ class RpcController {
       // Run Ansible playbook for SSL setup
       const ansibleProcess = spawn('ansible-playbook', [
         playbookPath,
-        '-i', `${ipAddress},`,  // Dynamic inventory
+        '-i', `${ip_address},`,  // Dynamic inventory
         '--private-key', process.env.ANSIBLE_PRIVATE_KEY_PATH || '~/.ssh/id_rsa',
         '--user', process.env.ANSIBLE_USER || 'root',
         '--extra-vars', `server_id=${serverId} domain=${domain}`,
@@ -500,9 +500,9 @@ const rpcController = new RpcController();
 
 // Bind all methods to ensure proper 'this' context
 const boundController = {
-  getAllRpcServers: rpcController.getAllRpcServers.bind(rpcController),
+  getAllrpc_servers: rpcController.getAllrpc_servers.bind(rpcController),
   getRpcServerById: rpcController.getRpcServerById.bind(rpcController),
-  getRpcServersByProject: rpcController.getRpcServersByProject.bind(rpcController),
+  getrpc_serversByProject: rpcController.getrpc_serversByProject.bind(rpcController),
   createRpcServer: rpcController.createRpcServer.bind(rpcController),
   updateRpcServer: rpcController.updateRpcServer.bind(rpcController),
   deleteRpcServer: rpcController.deleteRpcServer.bind(rpcController),

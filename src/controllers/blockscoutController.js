@@ -2,9 +2,9 @@ const blockscoutService = require('../services/blockscoutService');
 const axios = require('axios');
 
 class BlockscoutController {
-  async getAllBlockscoutServers(req, res, next) {
+  async getAllblockscout_servers(req, res, next) {
     try {
-      const servers = await blockscoutService.getAllBlockscoutServers();
+      const servers = await blockscoutService.getAllblockscout_servers();
       res.json({
         success: true,
         message: 'Blockscout servers retrieved successfully',
@@ -36,10 +36,10 @@ class BlockscoutController {
     }
   }
 
-  async getBlockscoutServersByProject(req, res, next) {
+  async getblockscout_serversByProject(req, res, next) {
     try {
-      const { projectId } = req.params;
-      const servers = await blockscoutService.getBlockscoutServersByProject(projectId);
+      const { project_id } = req.params;
+      const servers = await blockscoutService.getblockscout_serversByProject(project_id);
       res.json({
         success: true,
         message: 'Blockscout servers retrieved successfully',
@@ -96,7 +96,7 @@ class BlockscoutController {
         ipv6: true,
         monitoring: true,
         ssh_keys: process.env.DO_SSH_KEYS,
-        tags: [`project-${server.projectId}`, 'blockscout-server', `server-id-${server.id}`],
+        tags: [`project-${server.project_id}`, 'blockscout-server', `server-id-${server.id}`],
       };
 
       console.log('Creating droplet with config:', JSON.stringify(dropletConfig, null, 2));
@@ -117,7 +117,7 @@ class BlockscoutController {
 
       // Store droplet ID in database for later deletion
       await blockscoutService.updateBlockscoutServer(server.id, { 
-        dropletId: droplet.id,
+        droplet_id: droplet.id,
         status: 'provisioning'
       });
 
@@ -132,14 +132,14 @@ class BlockscoutController {
     }
   }
 
-  async waitForDropletActive(dropletId, serverId) {
+  async waitForDropletActive(droplet_id, serverId) {
     const maxAttempts = 30; // 5 minutes max wait time
     let attempts = 0;
 
     while (attempts < maxAttempts) {
       try {
         const response = await axios.get(
-          `https://api.digitalocean.com/v2/droplets/${dropletId}`,
+          `https://api.digitalocean.com/v2/droplets/${droplet_id}`,
           {
             headers: {
               'Authorization': `Bearer ${process.env.DO_API_TOKEN}`
@@ -155,11 +155,11 @@ class BlockscoutController {
           if (publicIp) {
             // Update server with actual IP address
             await blockscoutService.updateBlockscoutServer(serverId, { 
-              ipAddress: publicIp,
+              ip_address: publicIp,
               status: 'ready_to_domain_setup'
             });
             
-            console.log(`Droplet ${dropletId} is active with IP: ${publicIp}`);
+            console.log(`Droplet ${droplet_id} is active with IP: ${publicIp}`);
             
             // Run Ansible setup after droplet is ready
             this.runAnsibleSetupBlockscout(publicIp, serverId);
@@ -179,12 +179,12 @@ class BlockscoutController {
 
     // If we reach here, droplet creation failed or timed out
     await blockscoutService.updateBlockscoutServer(serverId, { status: 'failed' });
-    console.error(`Droplet ${dropletId} failed to become active within timeout period`);
+    console.error(`Droplet ${droplet_id} failed to become active within timeout period`);
   }
 
-  async runAnsibleSetupBlockscout(ipAddress, serverId) {
+  async runAnsibleSetupBlockscout(ip_address, serverId) {
     try {
-      console.log(`Starting Ansible setup for Blockscout server ${serverId} at IP: ${ipAddress}`);
+      console.log(`Starting Ansible setup for Blockscout server ${serverId} at IP: ${ip_address}`);
       
       const { spawn } = require('child_process');
       const path = require('path');
@@ -195,7 +195,7 @@ class BlockscoutController {
       // Run Ansible playbook
       const ansibleProcess = spawn('ansible-playbook', [
         playbookPath,
-        '-i', `${ipAddress},`,  // Dynamic inventory
+        '-i', `${ip_address},`,  // Dynamic inventory
         '--private-key', process.env.ANSIBLE_PRIVATE_KEY_PATH || '~/.ssh/id_rsa',
         '--user', process.env.ANSIBLE_USER || 'root',
         '--extra-vars', `server_id=${serverId}`,
@@ -230,11 +230,11 @@ class BlockscoutController {
     try {
       // First try to get droplet ID from database
       const server = await blockscoutService.getBlockscoutServerById(serverId);
-      if (server.dropletId) {
-        return server.dropletId;
+      if (server.droplet_id) {
+        return server.droplet_id;
       }
 
-      // Fallback: search by tag if dropletId is not stored
+      // Fallback: search by tag if droplet_id is not stored
       const response = await axios.get(
         `https://api.digitalocean.com/v2/droplets?tag_name=server-id-${serverId}`,
         {
@@ -272,17 +272,17 @@ class BlockscoutController {
 
   async deleteDigitalOceanDroplet(serverId) {
     try {
-      const dropletId = await this.findDropletByServerId(serverId);
+      const droplet_id = await this.findDropletByServerId(serverId);
       
-      if (!dropletId) {
+      if (!droplet_id) {
         console.log(`No droplet found for Blockscout server ${serverId}`);
         return true; // Consider it successful if no droplet exists
       }
 
-      console.log(`Deleting droplet ${dropletId} for Blockscout server ${serverId}`);
+      console.log(`Deleting droplet ${droplet_id} for Blockscout server ${serverId}`);
 
       await axios.delete(
-        `https://api.digitalocean.com/v2/droplets/${dropletId}`,
+        `https://api.digitalocean.com/v2/droplets/${droplet_id}`,
         {
           headers: {
             'Authorization': `Bearer ${process.env.DO_API_TOKEN}`
@@ -290,7 +290,7 @@ class BlockscoutController {
         }
       );
 
-      console.log(`Droplet ${dropletId} deleted successfully`);
+      console.log(`Droplet ${droplet_id} deleted successfully`);
       return true;
     } catch (error) {
       if (error.response?.status === 404) {
@@ -338,7 +338,7 @@ class BlockscoutController {
         });
       }
       
-      if (!server.ipAddress) {
+      if (!server.ip_address) {
         return res.status(400).json({
           success: false,
           message: 'Server IP address not available. Server may still be provisioning.'
@@ -359,14 +359,14 @@ class BlockscoutController {
       // Update server status
       await blockscoutService.updateBlockscoutServer(id, { 
         status: 'ssl_setup_started',
-        serverUrl: domain
+        server_url: domain
       });
       
       // Start SSL setup in the background
       const controller = this;
       setImmediate(async () => {
         try {
-          await controller.createSslCertificate(server.ipAddress, id, domain);
+          await controller.createSslCertificate(server.ip_address, id, domain);
         } catch (error) {
           console.error('Background SSL setup failed:', error);
           await blockscoutService.updateBlockscoutServer(id, { status: 'ssl_failed' });
@@ -378,9 +378,9 @@ class BlockscoutController {
     }
   }
   
-  async createSslCertificate(ipAddress, serverId, domain) {
+  async createSslCertificate(ip_address, serverId, domain) {
     try {
-      console.log(`Starting SSL setup for Blockscout server ${serverId} at IP: ${ipAddress} with domain: ${domain}`);
+      console.log(`Starting SSL setup for Blockscout server ${serverId} at IP: ${ip_address} with domain: ${domain}`);
       
       const { spawn } = require('child_process');
       const path = require('path');
@@ -391,7 +391,7 @@ class BlockscoutController {
       // Run Ansible playbook for SSL setup
       const ansibleProcess = spawn('ansible-playbook', [
         playbookPath,
-        '-i', `${ipAddress},`,  // Dynamic inventory
+        '-i', `${ip_address},`,  // Dynamic inventory
         '--private-key', process.env.ANSIBLE_PRIVATE_KEY_PATH || '~/.ssh/id_rsa',
         '--user', process.env.ANSIBLE_USER || 'root',
         '--extra-vars', `server_id=${serverId} domain=${domain}`,
@@ -418,7 +418,7 @@ class BlockscoutController {
           console.log(`SSL setup completed successfully for Blockscout server ${serverId}`);
           await blockscoutService.updateBlockscoutServer(serverId, { 
             status: 'running',
-            serverUrl: domain
+            server_url: domain
           });
         } else {
           console.error(`SSL setup failed for Blockscout server ${serverId} with exit code ${code}`);
@@ -501,9 +501,9 @@ const blockscoutController = new BlockscoutController();
 
 // Bind all methods to ensure proper 'this' context
 const boundController = {
-  getAllBlockscoutServers: blockscoutController.getAllBlockscoutServers.bind(blockscoutController),
+  getAllblockscout_servers: blockscoutController.getAllblockscout_servers.bind(blockscoutController),
   getBlockscoutServerById: blockscoutController.getBlockscoutServerById.bind(blockscoutController),
-  getBlockscoutServersByProject: blockscoutController.getBlockscoutServersByProject.bind(blockscoutController),
+  getblockscout_serversByProject: blockscoutController.getblockscout_serversByProject.bind(blockscoutController),
   createBlockscoutServer: blockscoutController.createBlockscoutServer.bind(blockscoutController),
   updateBlockscoutServer: blockscoutController.updateBlockscoutServer.bind(blockscoutController),
   deleteBlockscoutServer: blockscoutController.deleteBlockscoutServer.bind(blockscoutController),

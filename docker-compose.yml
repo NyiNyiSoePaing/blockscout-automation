@@ -1,0 +1,19 @@
+version: '3.3'
+
+services:
+  dev_postgres:
+    image: postgres:14  # Use the official Postgres image
+    container_name: dev_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: blockscout_dev
+      POSTGRES_USER: devadmin
+      POSTGRES_PASSWORD: devpassword
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data 

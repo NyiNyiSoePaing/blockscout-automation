@@ -4,13 +4,13 @@ const blockscoutController = require('../controllers/blockscoutController');
 const { blockscoutValidation } = require('../middleware/validation');
 
 // GET /api/blockscout - Get all Blockscout servers
-router.get('/', blockscoutController.getAllBlockscoutServers);
+router.get('/', blockscoutController.getAllblockscout_servers);
 
 // GET /api/blockscout/:id - Get Blockscout server by ID
 router.get('/:id', blockscoutController.getBlockscoutServerById);
 
-// GET /api/blockscout/project/:projectId - Get Blockscout servers by project
-router.get('/project/:projectId', blockscoutController.getBlockscoutServersByProject);
+// GET /api/blockscout/project/:project_id - Get Blockscout servers by project
+router.get('/project/:project_id', blockscoutController.getblockscout_serversByProject);
 
 // POST /api/blockscout - Create new Blockscout server
 router.post('/', blockscoutValidation.create, blockscoutController.createBlockscoutServer);

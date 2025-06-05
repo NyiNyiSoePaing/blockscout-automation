@@ -4,11 +4,11 @@ class ProjectService {
   async getAllProjects() {
     return await prisma.project.findMany({
       include: {
-        blockscoutServers: true,
-        rpcServers: true
+        blockscout_servers: true,
+        rpc_servers: true
       },
       orderBy: {
-        createdAt: 'desc'
+        created_at: 'desc'
       }
     });
   }
@@ -19,8 +19,8 @@ class ProjectService {
         id: parseInt(id),
       },
       include: {
-        blockscoutServers: true,
-        rpcServers: true
+        blockscout_servers: true,
+        rpc_servers: true
       }
     });
 
@@ -39,8 +39,8 @@ class ProjectService {
           description: data.description
         },
         include: {
-          blockscoutServers: true,
-          rpcServers: true
+          blockscout_servers: true,
+          rpc_servers: true
         }
       });
     } catch (error) {
@@ -65,8 +65,8 @@ class ProjectService {
           ...(data.description !== undefined && { description: data.description })
         },
         include: {
-          blockscoutServers: true,
-          rpcServers: true
+          blockscout_servers: true,
+          rpc_servers: true
         }
       });
     } catch (error) {

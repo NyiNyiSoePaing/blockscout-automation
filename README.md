@@ -85,7 +85,7 @@ npm start
 |--------|----------|-------------|
 | GET | `/api/blockscout` | Get all Blockscout servers |
 | GET | `/api/blockscout/:id` | Get Blockscout server by ID |
-| GET | `/api/blockscout/project/:projectId` | Get Blockscout servers by project |
+| GET | `/api/blockscout/project/:project_id` | Get Blockscout servers by project |
 | POST | `/api/blockscout` | Create new Blockscout server |
 | PUT | `/api/blockscout/:id` | Update Blockscout server |
 | DELETE | `/api/blockscout/:id` | Delete Blockscout server (soft delete) |
@@ -97,7 +97,7 @@ npm start
 |--------|----------|-------------|
 | GET | `/api/rpc` | Get all RPC servers |
 | GET | `/api/rpc/:id` | Get RPC server by ID |
-| GET | `/api/rpc/project/:projectId` | Get RPC servers by project |
+| GET | `/api/rpc/project/:project_id` | Get RPC servers by project |
 | POST | `/api/rpc` | Create new RPC server |
 | PUT | `/api/rpc/:id` | Update RPC server |
 | DELETE | `/api/rpc/:id` | Delete RPC server (soft delete) |
@@ -128,11 +128,11 @@ curl -X POST http://localhost:3000/api/projects \
 curl -X POST http://localhost:3000/api/blockscout \
   -H "Content-Type: application/json" \
   -d '{
-    "projectId": 1,
-    "networkType": "mainnet",
-    "serverUrl": "https://explorer.mychain.com",
-    "ipAddress": "192.168.1.100",
-    "chainId": "1",
+    "project_id": 1,
+    "network_type": "mainnet",
+    "server_url": "https://explorer.mychain.com",
+    "ip_address": "192.168.1.100",
+    "chain_id": "1",
     "currency": "ETH",
     "description": "Mainnet Blockscout server"
   }'
@@ -144,10 +144,10 @@ curl -X POST http://localhost:3000/api/blockscout \
 curl -X POST http://localhost:3000/api/rpc \
   -H "Content-Type: application/json" \
   -d '{
-    "projectId": 1,
-    "serverUrl": "https://rpc.mychain.com",
-    "ipAddress": "192.168.1.101",
-    "chainId": "1",
+    "project_id": 1,
+    "server_url": "https://rpc.mychain.com",
+    "ip_address": "192.168.1.101",
+    "chain_id": "1",
     "description": "Main RPC server"
   }'
 ```
@@ -165,25 +165,25 @@ curl http://localhost:3000/api/projects
 - **description**: Optional, max 1000 characters
 
 ### Blockscout Server Validation
-- **projectId**: Required, must be valid project ID
-- **networkType**: Required, must be "mainnet" or "testnet"
-- **serverUrl**: Required, must be valid URL
-- **ipAddress**: Required, must be valid IP address
-- **chainId**: Optional string
+- **project_id**: Required, must be valid project ID
+- **network_type**: Required, must be "mainnet" or "testnet"
+- **server_url**: Required, must be valid URL
+- **ip_address**: Required, must be valid IP address
+- **chain_id**: Optional string
 - **currency**: Optional string
 - **logo_url**: Optional, must be valid URL if provided
 - **rpc_url**: Optional, must be valid URL if provided
 - **network_link**: Optional string
 - **footer_link**: Optional string
-- **isActive**: Optional boolean, defaults to true
+- **is_active**: Optional boolean, defaults to true
 - **description**: Optional, max 1000 characters
 
 ### RPC Server Validation
-- **projectId**: Required, must be valid project ID
-- **serverUrl**: Required, must be valid URL
-- **ipAddress**: Required, must be valid IP address
-- **chainId**: Optional string
-- **isActive**: Optional boolean, defaults to true
+- **project_id**: Required, must be valid project ID
+- **server_url**: Required, must be valid URL
+- **ip_address**: Required, must be valid IP address
+- **chain_id**: Optional string
+- **is_active**: Optional boolean, defaults to true
 - **description**: Optional, max 1000 characters
 
 ### Business Rules
@@ -224,7 +224,7 @@ The API uses the provided Prisma schema with:
 - **Project**: Main entity for organizing Blockscout servers
 - **BlockscoutServer**: Blockchain explorer server configuration
 - **RpcServer**: RPC server configuration (included in schema)
-- **NetworkType**: Enum for mainnet/testnet classification
+- **network_type**: Enum for mainnet/testnet classification
 
 ## ⚡ Scripts
 

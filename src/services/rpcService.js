@@ -1,7 +1,7 @@
 const prisma = require('../lib/prisma');
 
 class RpcService {
-  async getAllRpcServers() {
+  async getAllrpc_servers() {
     return await prisma.rpcServer.findMany({
       include: {
         project: {
@@ -13,7 +13,7 @@ class RpcService {
         }
       },
       orderBy: {
-        createdAt: 'desc'
+        created_at: 'desc'
       }
     });
   }
@@ -41,10 +41,10 @@ class RpcService {
     return server;
   }
 
-  async getRpcServersByProject(projectId) {
+  async getrpc_serversByProject(project_id) {
     return await prisma.rpcServer.findMany({
       where: {
-        projectId: parseInt(projectId)
+        project_id: parseInt(project_id)
       },
       include: {
         project: {
@@ -56,7 +56,7 @@ class RpcService {
         }
       },
       orderBy: {
-        createdAt: 'desc'
+        created_at: 'desc'
       }
     });
   }
@@ -65,7 +65,7 @@ class RpcService {
     // Check if project exists
     const project = await prisma.project.findUnique({
       where: {
-        id: parseInt(data.projectId),
+        id: parseInt(data.project_id),
       }
     });
 
@@ -75,9 +75,9 @@ class RpcService {
 
     return await prisma.rpcServer.create({
       data: {
-        projectId: parseInt(data.projectId),
-        networkType: data.networkType,
-        chainId: data.chainId,
+        project_id: parseInt(data.project_id),
+        network_type: data.network_type,
+        chain_id: data.chain_id,
         status: 'provisioning',
         description: data.description
       },
@@ -102,10 +102,10 @@ class RpcService {
         id: parseInt(id)
       },
       data: {
-        ...(data.networkType && { networkType: data.networkType }),
-        ...(data.serverUrl && { serverUrl: data.serverUrl }),
-        ...(data.ipAddress && { ipAddress: data.ipAddress }),
-        ...(data.chainId !== undefined && { chainId: data.chainId }),
+        ...(data.network_type && { network_type: data.network_type }),
+        ...(data.server_url && { server_url: data.server_url }),
+        ...(data.ip_address && { ip_address: data.ip_address }),
+        ...(data.chain_id !== undefined && { chain_id: data.chain_id }),
         ...(data.status && { status: data.status }),
         ...(data.description !== undefined && { description: data.description })
       },

@@ -117,18 +117,18 @@ class ProjectController {
     }
   }
 
-  async cleanupProjectResources(projectId) {
+  async cleanupProjectResources(project_id) {
     try {
-      console.log(`Starting cleanup for project ${projectId}`);
+      console.log(`Starting cleanup for project ${project_id}`);
       
       // Get all RPC servers associated with this project
-      const rpcServers = await rpcService.getRpcServersByProject(projectId);
+      const rpc_servers = await rpcService.getrpc_serversByProject(project_id);
       
-      if (rpcServers.length > 0) {
-        console.log(`Found ${rpcServers.length} RPC servers to cleanup for project ${projectId}`);
+      if (rpc_servers.length > 0) {
+        console.log(`Found ${rpc_servers.length} RPC servers to cleanup for project ${project_id}`);
         
         // Delete all RPC servers and their droplets
-        const rpcDeletePromises = rpcServers.map(async (server) => {
+        const rpcDeletePromises = rpc_servers.map(async (server) => {
           try {
             console.log(`Cleaning up RPC server ${server.id}`);
             
@@ -153,19 +153,19 @@ class ProjectController {
         
         // Wait for all RPC server cleanups to complete
         await Promise.allSettled(rpcDeletePromises);
-        console.log(`All RPC servers cleanup completed for project ${projectId}`);
+        console.log(`All RPC servers cleanup completed for project ${project_id}`);
       } else {
-        console.log(`No RPC servers found for project ${projectId}`);
+        console.log(`No RPC servers found for project ${project_id}`);
       }
       
       // Get all Blockscout servers associated with this project
-      const blockscoutServers = await blockscoutService.getBlockscoutServersByProject(projectId);
+      const blockscout_servers = await blockscoutService.getblockscout_serversByProject(project_id);
       
-      if (blockscoutServers.length > 0) {
-        console.log(`Found ${blockscoutServers.length} Blockscout servers to cleanup for project ${projectId}`);
+      if (blockscout_servers.length > 0) {
+        console.log(`Found ${blockscout_servers.length} Blockscout servers to cleanup for project ${project_id}`);
         
         // Delete all Blockscout servers and their droplets
-        const blockscoutDeletePromises = blockscoutServers.map(async (server) => {
+        const blockscoutDeletePromises = blockscout_servers.map(async (server) => {
           try {
             console.log(`Cleaning up Blockscout server ${server.id}`);
             
@@ -190,42 +190,42 @@ class ProjectController {
         
         // Wait for all Blockscout server cleanups to complete
         await Promise.allSettled(blockscoutDeletePromises);
-        console.log(`All Blockscout servers cleanup completed for project ${projectId}`);
+        console.log(`All Blockscout servers cleanup completed for project ${project_id}`);
       } else {
-        console.log(`No Blockscout servers found for project ${projectId}`);
+        console.log(`No Blockscout servers found for project ${project_id}`);
       }
       
       // Finally, delete the project itself
-      await projectService.deleteProject(projectId);
-      console.log(`Project ${projectId} permanently deleted`);
+      await projectService.deleteProject(project_id);
+      console.log(`Project ${project_id} permanently deleted`);
       
     } catch (error) {
-      console.error(`Error during project ${projectId} cleanup:`, error);
+      console.error(`Error during project ${project_id} cleanup:`, error);
       
       // Try to delete the project even if cleanup failed
       try {
-        await projectService.deleteProject(projectId);
-        console.log(`Project ${projectId} deleted from database despite cleanup errors`);
+        await projectService.deleteProject(project_id);
+        console.log(`Project ${project_id} deleted from database despite cleanup errors`);
       } catch (dbError) {
-        console.error(`Failed to delete project ${projectId} from database:`, dbError);
+        console.error(`Failed to delete project ${project_id} from database:`, dbError);
       }
     }
   }
 
   async deleteDigitalOceanDroplet(serverId) {
     try {
-      const dropletId = await this.findDropletByServerId(serverId);
+      const droplet_id = await this.findDropletByServerId(serverId);
       
-      if (!dropletId) {
+      if (!droplet_id) {
         console.log(`No droplet found for server ${serverId}`);
         return true;
       }
 
-      console.log(`Deleting droplet ${dropletId} for server ${serverId}`);
+      console.log(`Deleting droplet ${droplet_id} for server ${serverId}`);
 
       const axios = require('axios');
       await axios.delete(
-        `https://api.digitalocean.com/v2/droplets/${dropletId}`,
+        `https://api.digitalocean.com/v2/droplets/${droplet_id}`,
         {
           headers: {
             'Authorization': `Bearer ${process.env.DO_API_TOKEN}`
@@ -233,7 +233,7 @@ class ProjectController {
         }
       );
 
-      console.log(`Droplet ${dropletId} deleted successfully`);
+      console.log(`Droplet ${droplet_id} deleted successfully`);
       return true;
     } catch (error) {
       if (error.response?.status === 404) {
@@ -250,11 +250,11 @@ class ProjectController {
     try {
       // First try to get droplet ID from database
       const server = await blockscoutService.getBlockscoutServerById(serverId);
-      if (server.dropletId) {
-        return server.dropletId;
+      if (server.droplet_id) {
+        return server.droplet_id;
       }
 
-      // Fallback: search by tag if dropletId is not stored
+      // Fallback: search by tag if droplet_id is not stored
       const response = await axios.get(
         `https://api.digitalocean.com/v2/droplets?tag_name=server-id-${serverId}`,
         {
@@ -292,17 +292,17 @@ class ProjectController {
 
   async deleteBlockscoutDroplet(serverId) {
     try {
-      const dropletId = await this.findBlockscoutDropletByServerId(serverId);
+      const droplet_id = await this.findBlockscoutDropletByServerId(serverId);
       
-      if (!dropletId) {
+      if (!droplet_id) {
         console.log(`No droplet found for Blockscout server ${serverId}`);
         return true; // Consider it successful if no droplet exists
       }
 
-      console.log(`Deleting droplet ${dropletId} for Blockscout server ${serverId}`);
+      console.log(`Deleting droplet ${droplet_id} for Blockscout server ${serverId}`);
 
       await axios.delete(
-        `https://api.digitalocean.com/v2/droplets/${dropletId}`,
+        `https://api.digitalocean.com/v2/droplets/${droplet_id}`,
         {
           headers: {
             'Authorization': `Bearer ${process.env.DO_API_TOKEN}`
@@ -310,7 +310,7 @@ class ProjectController {
         }
       );
 
-      console.log(`Droplet ${dropletId} deleted successfully`);
+      console.log(`Droplet ${droplet_id} deleted successfully`);
       return true;
     } catch (error) {
       if (error.response?.status === 404) {
@@ -329,11 +329,11 @@ class ProjectController {
       
       // First try to get droplet ID from database
       const server = await rpcService.getRpcServerById(serverId);
-      if (server.dropletId) {
-        return server.dropletId;
+      if (server.droplet_id) {
+        return server.droplet_id;
       }
 
-      // Fallback: search by tag if dropletId is not stored
+      // Fallback: search by tag if droplet_id is not stored
       const response = await axios.get(
         `https://api.digitalocean.com/v2/droplets?tag_name=server-id-${serverId}`,
         {

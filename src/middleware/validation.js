@@ -48,17 +48,17 @@ const projectValidation = {
 // BlockscoutServer validation rules
 const blockscoutValidation = {
   create: [
-    body('projectId').isInt({ min: 1 }).withMessage('Valid project ID is required'),
-    body('networkType')
+    body('project_id').isInt({ min: 1 }).withMessage('Valid project ID is required'),
+    body('network_type')
       .isIn(['mainnet', 'testnet'])
       .withMessage('Network type must be either mainnet or testnet'),
-    // body('serverUrl')
+    // body('server_url')
     //   .isURL()
     //   .withMessage('Valid server URL is required'),
-    // body('ipAddress')
+    // body('ip_address')
     //   .isIP()
     //   .withMessage('Valid IP address is required'),
-    body('chainId')
+    body('chain_id')
       .optional()
       .isString()
       .withMessage('Chain ID must be a string'),
@@ -82,10 +82,10 @@ const blockscoutValidation = {
       .optional()
       .isString()
       .withMessage('Footer links must be a string'),
-    body('isActive')
+    body('is_active')
       .optional()
       .isBoolean()
-      .withMessage('isActive must be a boolean'),
+      .withMessage('is_active must be a boolean'),
     body('description')
       .optional()
       .isLength({ max: 1000 })
@@ -105,19 +105,19 @@ const blockscoutValidation = {
   ],
   update: [
     param('id').isInt({ min: 1 }).withMessage('Valid blockscout server ID is required'),
-    body('networkType')
+    body('network_type')
       .optional()
       .isIn(['mainnet', 'testnet'])
       .withMessage('Network type must be either mainnet or testnet'),
-    body('serverUrl')
+    body('server_url')
       .optional()
       .isURL()
       .withMessage('Server URL must be valid'),
-    body('ipAddress')
+    body('ip_address')
       .optional()
       .isIP()
       .withMessage('IP address must be valid'),
-    body('chainId')
+    body('chain_id')
       .optional()
       .isString()
       .withMessage('Chain ID must be a string'),
@@ -141,10 +141,10 @@ const blockscoutValidation = {
       .optional()
       .isString()
       .withMessage('Footer links must be a string'),
-    body('isActive')
+    body('is_active')
       .optional()
       .isBoolean()
-      .withMessage('isActive must be a boolean'),
+      .withMessage('is_active must be a boolean'),
     body('description')
       .optional()
       .isLength({ max: 1000 })
@@ -160,26 +160,26 @@ const blockscoutValidation = {
 // RpcServer validation rules
 const rpcValidation = {
   create: [
-    body('projectId').isInt({ min: 1 }).withMessage('Valid project ID is required'),
-    // body('serverUrl')
+    body('project_id').isInt({ min: 1 }).withMessage('Valid project ID is required'),
+    // body('server_url')
     //   .isURL()
     //   .withMessage('Valid server URL is required'),
     body('network_link')
       .optional()
       .isString()
       .withMessage('Network links must be a string'),
-    body('chainId')
+    body('chain_id')
       .optional()
       .isString()
       .withMessage('Chain ID must be a string'),
-    body('isActive')
+    body('is_active')
       .optional()
       .isBoolean()
-      .withMessage('isActive must be a boolean'),
-    body('serverUrl')
+      .withMessage('is_active must be a boolean'),
+    body('server_url')
       .optional()
       .isString()
-      .withMessage('serverUrl must be a string'),
+      .withMessage('server_url must be a string'),
     body('description')
       .optional()
       .isLength({ max: 1000 })
@@ -202,22 +202,22 @@ const rpcValidation = {
   ],
   update: [
     param('id').isInt({ min: 1 }).withMessage('Valid RPC server ID is required'),
-    body('serverUrl')
+    body('server_url')
       .optional()
       .isURL()
       .withMessage('Server URL must be valid'),
-    body('ipAddress')
+    body('ip_address')
       .optional()
       .isIP()
       .withMessage('IP address must be valid'),
-    body('chainId')
+    body('chain_id')
       .optional()
       .isString()
       .withMessage('Chain ID must be a string'),
-    body('isActive')
+    body('is_active')
       .optional()
       .isBoolean()
-      .withMessage('isActive must be a boolean'),
+      .withMessage('is_active must be a boolean'),
     body('description')
       .optional()
       .isLength({ max: 1000 })

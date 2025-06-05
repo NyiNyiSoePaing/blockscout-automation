@@ -1,6 +1,6 @@
 const prisma = require('../lib/prisma');
 class BlockscoutService {
-  async getAllBlockscoutServers() {
+  async getAllblockscout_servers() {
     return await prisma.blockscoutServer.findMany({
       include: {
         project: {
@@ -12,7 +12,7 @@ class BlockscoutService {
         }
       },
       orderBy: {
-        createdAt: 'desc'
+        created_at: 'desc'
       }
     });
   }
@@ -40,10 +40,10 @@ class BlockscoutService {
     return server;
   }
 
-  async getBlockscoutServersByProject(projectId) {
+  async getblockscout_serversByProject(project_id) {
     return await prisma.blockscoutServer.findMany({
       where: {
-        projectId: parseInt(projectId)
+        project_id: parseInt(project_id)
       },
       include: {
         project: {
@@ -55,7 +55,7 @@ class BlockscoutService {
         }
       },
       orderBy: {
-        createdAt: 'desc'
+        created_at: 'desc'
       }
     });
   }
@@ -64,7 +64,7 @@ class BlockscoutService {
     // Check if project exists
     const project = await prisma.project.findUnique({
       where: {
-        id: parseInt(data.projectId),
+        id: parseInt(data.project_id),
       }
     });
 
@@ -74,14 +74,14 @@ class BlockscoutService {
 
     return await prisma.blockscoutServer.create({
       data: {
-        projectId: parseInt(data.projectId),
-        networkType: data.networkType,
-        chainId: data.chainId,
+        project_id: parseInt(data.project_id),
+        network_type: data.network_type,
+        chain_id: data.chain_id,
         currency: data.currency,
-        logoUrl: data.logoUrl,
-        rpcUrl: data.rpcUrl,
-        networkLink: data.networkLink,
-        footerLink: data.footerLink,
+        logo_url: data.logo_url,
+        rpc_url: data.rpc_url,
+        network_link: data.network_link,
+        footer_link: data.footer_link,
         status: 'provisioning',
         description: data.description
       },
@@ -106,17 +106,17 @@ class BlockscoutService {
         id: parseInt(id)
       },
       data: {
-        ...(data.networkType && { networkType: data.networkType }),
-        ...(data.serverUrl && { serverUrl: data.serverUrl }),
-        // ...(data.dropletId && { dropletId: data.dropletId }),
-        ...(data.ipAddress && { ipAddress: data.ipAddress }),
-        ...(data.chainId !== undefined && { chainId: data.chainId }),
+        ...(data.network_type && { network_type: data.network_type }),
+        ...(data.server_url && { server_url: data.server_url }),
+        // ...(data.droplet_id && { droplet_id: data.droplet_id }),
+        ...(data.ip_address && { ip_address: data.ip_address }),
+        ...(data.chain_id !== undefined && { chain_id: data.chain_id }),
         ...(data.currency !== undefined && { currency: data.currency }),
-        ...(data.logoUrl !== undefined && { logoUrl: data.logoUrl }),
-        ...(data.rpcUrl !== undefined && { rpcUrl: data.rpcUrl }),
-        ...(data.networkLink !== undefined && { networkLink: data.networkLink }),
-        ...(data.footerLink !== undefined && { footerLink: data.footerLink }),
-        ...(data.isActive !== undefined && { isActive: data.isActive }),
+        ...(data.logo_url !== undefined && { logo_url: data.logo_url }),
+        ...(data.rpc_url !== undefined && { rpc_url: data.rpc_url }),
+        ...(data.network_link !== undefined && { network_link: data.network_link }),
+        ...(data.footer_link !== undefined && { footer_link: data.footer_link }),
+        ...(data.is_active !== undefined && { is_active: data.is_active }),
         ...(data.status && { status: data.status }),
         ...(data.description !== undefined && { description: data.description })
       },

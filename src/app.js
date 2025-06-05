@@ -38,9 +38,9 @@ app.use('/api', routes);
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: 'Welcome to Blockscout CRUD API',
+    message: 'Welcome to Blockscout Automation API',
     version: '1.0.0',
-    documentation: '/api/health',
+    health_check: '/api/health',
     endpoints: {
       projects: '/api/projects',
       blockscout: '/api/blockscout',

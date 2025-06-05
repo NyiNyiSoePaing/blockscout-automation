@@ -1,3 +1,8 @@
+## Firewall
+
+tag = rpc-server
+tag = blockscout
+
 # Blockscout CRUD API
 
 A complete REST API for managing Blockscout servers with Express.js and Prisma ORM. This API implements proper validation ensuring that each project can have only one mainnet and one testnet Blockscout server.
